@@ -55,7 +55,7 @@ sub _set_claim_status {
     my ( $issue_url, $github_labels ) = @_;
     my @labels = _labels_to_keep( "status: claimed", $github_labels );
     push @labels, "status: claimed" if @labels;
-    _replace_labels( $issue_url, 0, @labels );
+    _replace_labels( $issue_url, @labels );
 }
 
 sub _labels_to_keep {
@@ -131,7 +131,7 @@ sub label_from_comment {
     # add the current status to the list of labels, if we have any other labels that needed replacing
     push @labels, $current_status if $current_status && @labels;
 
-    _replace_labels( $payload->{issue}->{url}, $is_pull_request, @labels );
+    _replace_labels( $payload->{issue}->{url}, @labels );
 }
 
 sub label_from_new_issue {
@@ -144,7 +144,7 @@ sub label_from_new_issue {
     push @labels, "status: untriaged" unless @labels;
     push @labels, "status: claimed" if $payload->{issue}->{assignee};
 
-    _replace_labels( $issue->{url}, 0, @labels );
+    _replace_labels( $issue->{url}, @labels );
 }
 
 sub label_from_new_pull_request {
@@ -156,7 +156,7 @@ sub label_from_new_pull_request {
     my @labels = _extract_labels( $pr->{body}, $pr->{labels} );
     push @labels, "status: untriaged" unless @labels;
 
-    _replace_labels( $pr->{issue_url}, 1, @labels );
+    _replace_labels( $pr->{issue_url}, @labels );
 }
 
 # labels are in the form of: "##label" "##prefix:label"
@@ -194,7 +194,7 @@ sub _extract_labels {
 }
 
 sub _replace_labels {
-    my ( $issue_url, $is_pull_request, @labels ) = @_;
+    my ( $issue_url, @labels ) = @_;
     return unless @labels;
 
     # replace all labels in the issue
